@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>GifTastic HW</title>
+    <link rel="stylesheet" type="text/css" href="assets/style.css">
+    <script
+    src="https://code.jquery.com/jquery-3.3.1.js"
+    integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+    crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div id="buttonArea"></div>
+    <br>
+    
+
+    <form id="search-form">
+        <label for="search-input">Add in your search!</label>
+        <input type="text" id="search-input"><br>
+        <br>
+        <input id="addSearch" type="submit" value="Submit">
+        
+        
+    </form>
+
+    <div id="searches"></div>
+        
+    <script>
+
+    var topics = ["2Pac" , "Jay-Z" , "Eminem"];
+
+    $(function(){
+        displayGIFInfo(topics,"searchButton","#buttonArea");
+        console.log("New loaded page")
+    })
+
+
+
+function displayGIFInfo(topics,addClass,areaToAddTo){
+    $(areaToAddTo).empty();
+    for(var i=0; i<topics.length;i++){
+        var a = $('<button>');
+        a.addClass(addClass);
+        a.attr('data-type',topics[i]);
+        a.text(topics[i]);
+        $(areaToAddTo).append(a);
+    }
+}
+
+$(document).on('click','.searchButton',function(){
+    $('#searches').empty();
+    var type = $(this).data('type');
+    var queryURL = 'https://api.giphy.com/v1/gifs/search?q=' + type + '&api_key=XMruAbFWwFz8z1t1SwVBchhT54ImiqKa&limit=10';
+
+    $.ajax({url:queryURL,method: "GET"})
+    .then(function(response){
+        console.log(response);
+        for(var i=0;i<response.data.length;i++){
+            var searchDiv = $('<div class="search-item">');
+            var rating = response.data[i].rating;
+            var p = $('<p>').text("Rating: "+rating); 
+            var animated = response.data[i].images.fixed_height_url;
+            var still =  response.data[i].images.fixed_height_still.url;
+            var image = $("<img>");
+            
+            image.attr('src',still);
+            image.attr('data-still',still);
+            image.attr('data-animated',animated);
+            image.attr('data-state','still');
+            image.addClass('searchImage');
+           
+            searchDiv.append(p);
+            searchDiv.append(image);
+            
+            $('#searches').append(searchDiv);
+        }
+    })
+})
+
+$(document).on('click','.searchImage',function(){
+    var state = $(this).attr('data-state');
+    if(state =='still'){
+        $(this).attr('src',$(this).data('animated'));
+        $(this).attr('data-state','animated');
+    } else {
+        $(this).attr('src',$(this).data('still'));
+        $(this).attr('data-state','still');  
+      }  
+})
+    
+$("#addSearch").on('click',function(){
+    var newSearch = $('input').eq(0).val();
+    topics.push(newSearch);
+    displayGIFInfo(topics,"searchButton","#buttonArea");
+    return false;
+})
+    </script>
+    
+</body>
+</html>
